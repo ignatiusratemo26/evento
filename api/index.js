@@ -28,13 +28,12 @@ app.use(
 
 
 // mongoose.connect(process.env.MONGO_URL);
-mongoose.connect(process.env.MONGO_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  tls: true,
-  tlsAllowInvalidCertificates: false,
-  serverSelectionTimeoutMS: 30000
-});
+mongoose.connect(process.env.MONGO_URL)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    // Don't crash the server on connection error
+  });
 
 const uploadDir = path.join(__dirname, 'uploads');
 
