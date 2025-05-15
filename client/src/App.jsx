@@ -18,7 +18,7 @@ import PaymentSummary from './pages/PaymentSummary'
 import TicketPage from './pages/TicketPage'
 import CreatEvent from './pages/CreateEvent'
 
-axios.defaults.baseURL = 'http://localhost:4000/';
+axios.defaults.baseURL = 'https://evento-ems-api.onrender.com/';
 axios.defaults.withCredentials=true;
 
 function App() {

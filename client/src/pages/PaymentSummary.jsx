@@ -343,7 +343,7 @@ export default function PaymentSummary() {
                     {event.image && (
                       <div className="w-16 h-16 ml-4">
                         <img 
-                          src={`http://localhost:4000/${event.image}`} 
+                          src={`https://evento-ems-api.onrender.com/${event.image}`} 
                           alt={event.title}
                           className="w-full h-full object-cover rounded"
                         />

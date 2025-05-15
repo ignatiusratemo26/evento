@@ -66,7 +66,7 @@ import { BiLike } from "react-icons/bi";
               <div className='h-48 overflow-hidden rounded-t-xl'>
                 {event.image ? (
                   <img
-                    src={`http://localhost:4000/${event.image}`}
+                    src={`https://evento-ems-api.onrender.com/${event.image}`}
                     alt={event.title}
                     className="w-full h-full object-cover"
                   />
