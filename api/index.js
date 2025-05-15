@@ -27,7 +27,15 @@ app.use(
 );
 
 
-mongoose.connect(process.env.MONGO_URL);
+// mongoose.connect(process.env.MONGO_URL);
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  tls: true,
+  tlsAllowInvalidCertificates: false,
+  directConnection: true,
+  serverSelectionTimeoutMS: 30000
+});
 
 const uploadDir = path.join(__dirname, 'uploads');
 
