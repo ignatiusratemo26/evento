@@ -65,7 +65,7 @@ export default function OrderSummary() {
               <div className="w-full md:w-1/3 aspect-video rounded-lg overflow-hidden bg-gray-200">
                 {event.image ? (
                   <img
-                    src={`http://localhost:4000/${event.image}`}
+                    src={`https://evento-ems-api.onrender.com/${event.image}`}
                     alt={event.title}
                     className="w-full h-full object-cover"
                   />
