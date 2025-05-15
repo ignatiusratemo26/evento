@@ -3,7 +3,6 @@ import { Link, Navigate } from 'react-router-dom'
 import axios from 'axios'
 import { UserContext } from '../UserContext'
 
-
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -11,7 +10,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const {setUser} = useContext(UserContext);
-
+  const [isLoading, setIsLoading] = useState(false);
 
   //! Fetch users from the server --------------------------------------------------------------
   useEffect(() => {
@@ -20,31 +19,34 @@ export default function LoginPage() {
     if (storedEmail) {
       setEmail(storedEmail);
       setPassword(storedPass);
+      setRememberMe(true);
     }
   }, []);
 
-
   async function loginUser(ev){
-      ev.preventDefault();
+    ev.preventDefault();
+    setIsLoading(true);
 
-      try{
-        const {data} = await axios.post('/login', {email, password})
-        setUser(data);
-        alert('Login success');
+    try{
+      const {data} = await axios.post('/login', {email, password})
+      setUser(data);
 
-        if (rememberMe) {
-          // If the user checked, store their email in localStorage.
-          localStorage.setItem('rememberedEmail', email);
-          localStorage.setItem('rememberedpass', password);
-        } else {
-          // If the user didnt checked, remove their email from localStorage.
-          localStorage.removeItem('rememberedEmail');
-        }
-
-        setRedirect(true)
-      }catch(e){
-        alert('Login failed');
+      if (rememberMe) {
+        // If the user checked, store their email in localStorage.
+        localStorage.setItem('rememberedEmail', email);
+        localStorage.setItem('rememberedpass', password);
+      } else {
+        // If the user didnt checked, remove their email from localStorage.
+        localStorage.removeItem('rememberedEmail');
+        localStorage.removeItem('rememberedpass');
       }
+
+      setRedirect(true)
+    } catch(e) {
+      alert('Login failed. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   if(redirect){
@@ -52,103 +54,154 @@ export default function LoginPage() {
   }
   
   return (
-    <div className ="flex w-full h-full lg:ml-24 px-10 py-10 justify-between place-items-center mt-20">
-      <div className= "bg-white w-full sm:w-full md:w-1/2 lg:w-1/3 px-7 py-7 rounded-xl justify-center align-middle">
-    
-        <form className="flex flex-col w-auto items-center" onSubmit={loginUser}>
-            <h1 className='px-3 font-extrabold mb-5 text-primarydark text-2xl '>Sign In</h1>
-
-
-            <div className= "input">
-              {/* <img src={account} alt="Name" className="name"/> */}
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                <path fillRule="evenodd" d="M17.834 6.166a8.25 8.25 0 100 11.668.75.75 0 011.06 1.06c-3.807 3.808-9.98 3.808-13.788 0-3.808-3.807-3.808-9.98 0-13.788 3.807-3.808 9.98-3.808 13.788 0A9.722 9.722 0 0121.75 12c0 .975-.296 1.887-.809 2.571-.514.685-1.28 1.179-2.191 1.179-.904 0-1.666-.487-2.18-1.164a5.25 5.25 0 11-.82-6.26V8.25a.75.75 0 011.5 0V12c0 .682.208 1.27.509 1.671.3.401.659.579.991.579.332 0 .69-.178.991-.579.3-.4.509-.99.509-1.671a8.222 8.222 0 00-2.416-5.834zM15.75 12a3.75 3.75 0 10-7.5 0 3.75 3.75 0 007.5 0z" clipRule="evenodd" />
-              </svg>
-
-              <input type ="email"  placeholder="Email" className="input-et" value={email} onChange={ev => setEmail(ev.target.value)}/>
-            </div>
-
-            <div className= "input">
-              {/* <img src={account} alt="Name" className="name"/> */}
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                <path fillRule="evenodd" d="M15.75 1.5a6.75 6.75 0 00-6.651 7.906c.067.39-.032.717-.221.906l-6.5 6.499a3 3 0 00-.878 2.121v2.818c0 .414.336.75.75.75H6a.75.75 0 00.75-.75v-1.5h1.5A.75.75 0 009 19.5V18h1.5a.75.75 0 00.53-.22l2.658-2.658c.19-.189.517-.288.906-.22A6.75 6.75 0 1015.75 1.5zm0 3a.75.75 0 000 1.5A2.25 2.25 0 0118 8.25a.75.75 0 001.5 0 3.75 3.75 0 00-3.75-3.75z" clipRule="evenodd" />
-              </svg>
-
-              <input type ={showPassword ? 'text' : 'password'}  placeholder="Password" className="input-et" value={password} onChange={ev => setPassword(ev.target.value)}/>
-              <div type='button' className="" onClick={() => setShowPassword((prev) => !prev)}>
-                {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                    <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
-                    <path fillRule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 010-1.113zM17.25 12a5.25 5.25 0 11-10.5 0 5.25 5.25 0 0110.5 0z" clipRule="evenodd" />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Welcome back</h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Sign in to your account to continue
+          </p>
+        </div>
+        
+        <div className="mt-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <form className="space-y-6" onSubmit={loginUser}>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email address
+              </label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                   </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                    <path d="M3.53 2.47a.75.75 0 00-1.06 1.06l18 18a.75.75 0 101.06-1.06l-18-18zM22.676 12.553a11.249 11.249 0 01-2.631 4.31l-3.099-3.099a5.25 5.25 0 00-6.71-6.71L7.759 4.577a11.217 11.217 0 014.242-.827c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113z" />
-                    <path d="M15.75 12c0 .18-.013.357-.037.53l-4.244-4.243A3.75 3.75 0 0115.75 12zM12.53 15.713l-4.243-4.244a3.75 3.75 0 004.243 4.243z" />
-                    <path d="M6.75 12c0-.619.107-1.213.304-1.764l-3.1-3.1a11.25 11.25 0 00-2.63 4.31c-.12.362-.12.752 0 1.114 1.489 4.467 5.704 7.69 10.675 7.69 1.5 0 2.933-.294 4.242-.827l-2.477-2.477A5.25 5.25 0 016.75 12z" />
+                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(ev) => setEmail(ev.target.value)}
+                  className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3"
+                  placeholder="you@example.com"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 116 0z" clipRule="evenodd" />
                   </svg>
-                    )}
+                </div>
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(ev) => setPassword(ev.target.value)}
+                  className="focus:ring-primary focus:border-primary block w-full pl-10 pr-10 sm:text-sm border-gray-300 rounded-md py-3"
+                  placeholder="••••••••"
+                />
+                <div 
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                      <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
+                      <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
+                    </svg>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className='flex w-full h-full mt-4 justify-between px-1'>
-              <div className='flex gap-2'>
-              <input  type="checkbox" checked={rememberMe} onChange={() => setRememberMe(prev => !prev)}/> 
-              Remember Me
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={() => setRememberMe((prev) => !prev)}
+                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                  Remember me
+                </label>
               </div>
-              <div>
-                <Link to={'/forgotpassword'}>
-                  Forgot Password ?
+
+              <div className="text-sm">
+                <Link to="/forgotpassword" className="font-medium text-primary hover:text-primary-dark">
+                  Forgot your password?
                 </Link>
               </div>
-              
             </div>
 
-            
-            <div className="w-full py-4">
-              <button type="submit" className="primary w-full"> Sign in </button>
-            </div>
-
-            <div className="container2 ">
-              <div className="w-full h-full p-1">
-                <Link to={'/login'}>
-                  <button type="submit" className="text-white cursor-pointer rounded w-full h-full bg-primary font-bold" > Sign In</button>
-                </Link>
-              </div>
-              <div className="w-full h-full p-1">
-                <Link to={'/register'}>
-                  <button type="submit" className="text-black cursor-pointer rounded w-full h-full font-bold" > Sign Up</button>
-                </Link>
-              </div>
-            </div>
-
-            <Link to={'/'} className="">
-              <button className="secondary">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                  <path fillRule="evenodd" d="M11.03 3.97a.75.75 0 010 1.06l-6.22 6.22H21a.75.75 0 010 1.5H4.81l6.22 6.22a.75.75 0 11-1.06 1.06l-7.5-7.5a.75.75 0 010-1.06l7.5-7.5a.75.75 0 011.06 0z" clipRule="evenodd" />
-                </svg> 
-                Back 
+            <div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+              >
+                {isLoading ? (
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : null}
+                Sign in
               </button>
-            </Link>
+            </div>
+          </form>
 
-        </form>
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Don't have an account?</span>
+              </div>
+            </div>
 
-    </div>
-   
-    <div className= "hidden lg:flex flex-col right-box">
-      <div className='flex flex-col -ml-96 gap-3'>
-        <div className='text-3xl font-black'>Welcome to</div>
-        <div>
-          <img src="../src/assets/logo.png" alt="" className="w-48"/>
+            <div className="mt-6">
+              <Link
+                to="/register"
+                className="w-full flex justify-center py-3 px-4 border border-primary rounded-md shadow-sm text-sm font-medium text-primary bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              >
+                Sign up
+              </Link>
+            </div>
+            
+            <div className="mt-4">
+              <Link
+                to="/"
+                className="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                </svg>
+                Back to home
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
-
-        <div className="-ml-48 w-80 mt-12">
-          <img src="../src/assets/signinpic.svg" alt="" className='w-full'/>
-        </div>   
-        
     </div>
-    
-  </div>
   )
 }
